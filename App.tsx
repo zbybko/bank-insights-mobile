@@ -9,6 +9,7 @@ export default function App() {
     state: string;
     amount: string;
     fee: string;
+    bookingDate: string;
   };
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -21,7 +22,7 @@ export default function App() {
     async function loadTransactions() {
       try {
         const response = await fetch(
-          'http://172.20.10.7:8080/api/transactions',
+          'http://192.168.0.236:8080/api/transactions',
           { signal: controller.signal }
         );
 
@@ -77,6 +78,10 @@ export default function App() {
               <View style={styles.details}>
                 <Text style={styles.description} numberOfLines={1}>
                   {item.description || 'No description'}
+                </Text>
+
+                <Text style={styles.subtitle}>
+                  {item.bookingDate.replace('T', ' ')}
                 </Text>
 
                 <Text style={styles.subtitle}>
