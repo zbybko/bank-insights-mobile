@@ -21,6 +21,8 @@ affiliated with Revolut or any other bank.
 
 - Fetches `GET /api/transactions` when the screen mounts.
 - Loading indicator, error message, empty state and transaction count.
+- Retry action after a failed request; unexpected API response shapes show an
+  error instead of crashing the transaction list.
 - Transaction cards with description, local booking timestamp and currency.
 - Distinguishes negative and nonnegative amounts visually without doing money
   arithmetic in JavaScript. "Money in" is not necessarily income.
