@@ -10,13 +10,12 @@ export function useTransactions() {
     const [attempt, setAttempt] = useState(0);
 
     function retry() {
+        setLoading(true);
+        setError(null);
         setAttempt(previous => previous + 1);
     }
 
     useEffect(() => {
-        setLoading(true);
-        setError(null);
-
         const controller = new AbortController();
     
         async function loadTransactions() {
