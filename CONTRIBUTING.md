@@ -19,3 +19,14 @@ not automatically completing the implementation.
 Before merge, explain the behavior and failure cases yourself. Reuse the PR
 template to document the actual change and actual validation, without invented
 test results or unsupported production claims.
+
+## Branches and issue completion
+
+Keep `main` for integrated work. Start a short-lived branch per bounded issue
+from updated `main`; use separate branches/worktrees for parallel contributions.
+Open a draft PR early and link its backend contract dependencies. Use `Refs #N`
+for partial work and `Closes #N` only when the complete issue is satisfied.
+Close issues after merge and acceptance checks, not merely after a local commit.
+An epic stays open until its agreed child tasks are complete. Do not push feature
+work directly to `main`. Update local `main` after merge before starting the next
+branch. Repository rulesets are separate settings, not enforced by this guide.

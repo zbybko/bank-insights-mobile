@@ -1,22 +1,19 @@
 ## Problem and resulting behavior
 
-What concrete user behavior changes?
+Describe the behavior and design change.
 
-## Task and API dependency
+## Issue and scope
 
-Task: F-XX
-Companion backend issue/PR, if needed:
-Required API version or response change:
+Refs #<!-- issue number -->
+
+Use `Closes #N` only for the complete issue. Do not close an epic for one task.
 
 ## Validation
 
-Commands run and device tested:
-Loading / empty / error / success / cancellation states checked:
+- Typecheck/lint and other checks actually run:
+- Browser/device verification:
+- What remains unverified:
 
-## Decisions and limitations
+## Backend dependencies
 
-Tradeoffs, known gaps and follow-up work:
-
-- [ ] UI/documentation in English; screenshots and fixtures are synthetic.
-- [ ] No bank/model/provider credentials in the client or diff.
-- [ ] I can explain the change and its failure cases.
+Link API/contract PRs and state the required merge order, or state none.
