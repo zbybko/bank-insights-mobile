@@ -34,13 +34,21 @@ npm ci
 npx expo start --lan
 ```
 
-On a phone, set the backend's reachable LAN URL before starting Metro:
+In LAN development, `src/config/api.ts` automatically uses Expo's host address
+with backend port `8080`. Keep the phone and Mac on the same Wi-Fi, run the
+backend on a network-accessible interface, and reconnect to Expo after changing
+networks. No hard-coded Mac IP is needed.
+
+To override this address (for example, for a hosted backend):
 
 ```bash
-EXPO_PUBLIC_API_URL=http://YOUR_MAC_LAN_IP:8080 npx expo start --lan
+EXPO_PUBLIC_API_URL=https://your-backend.example.com npx expo start --lan
 ```
 
-The existing LAN development fallback is in `src/config/api.ts`. Web defaults
+An existing `EXPO_PUBLIC_API_URL` in `.env` takes priority: remove it to use
+automatic detection, then restart Expo. Expo tunnel mode does not expose backend
+port `8080`; use a separate backend URL override for that mode. Release builds
+require an explicit backend URL. Web development without an Expo host falls back
 to `http://localhost:8080`. The URL is public configuration, not a secret.
 Never include bank or model credentials in an `EXPO_PUBLIC_*` variable.
 
