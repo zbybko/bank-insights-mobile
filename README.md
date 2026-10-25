@@ -1,105 +1,97 @@
 # Bank Insights · Mobile
 
-**A React Native iPhone client for understanding bank transactions.**
+Expo SDK 58 / React Native / TypeScript personal finance app, using the approved
+presentation's dark cosmic palette, glass-style controls and rounded cards.
+[Companion Java backend](https://github.com/zbybko/bank-insights-backend).
 
-Built with Expo SDK 57, React Native 0.86, React 19 and TypeScript. The current
-screen fetches completed transactions from a Java/Spring Boot API and displays
-their descriptions, booking dates, currency and exact amount strings.
+## Current screens
 
-The direction is an account connection flow, currency-separated spending
-dashboards, and explainable AI category suggestions. These are planned; the
-current app is a local-development transaction feed. Independent project; not
-affiliated with Revolut or any other bank.
+- **Plan**: money received in the selected month, money out, net flow and category
+  spending. No transaction list on the home screen.
+- **Activity**: transactions for the selected month and currency, search, and a
+  needs-review filter. Shows the clarification question when one exists.
+- **Insights**: monthly cash flow, separately recorded fees and category spending.
+- **Category detail**: spending total and matching outgoing transactions, with
+  search and month switching.
 
-**Companion:** [Java / Spring Boot backend API](https://github.com/zbybko/bank-insights-backend).
+Month and currency selection are shared across screens. Future months are
+blocked; tap the month label to return to the current month. Additional currency
+chips appear when a month contains more than one currency. Pull to refresh Plan
+or transaction lists. Empty, loading and error states are explicit.
 
-**Legacy implementation:** [Python bank-insights](https://github.com/zbybko/bank-insights).
+The visual reference is the existing `bank-insights-linkedin-wide` approved
+composition. The selected wallpaper is Graphite Pearl, scaled to the screen
+container with `cover`. Five generated background variants and their prompts
+are kept in `assets/backgrounds/`. Nothing in the video source was edited.
 
-[Mobile checklist](docs/ROADMAP.md) · [Development workflow](CONTRIBUTING.md)
+## Run locally
 
-## Current behavior
-
-- Fetches `GET /api/transactions` when the screen mounts.
-- Loading indicator, error message, empty state and transaction count.
-- Retry action after a failed request; unexpected API response shapes show an
-  error instead of crashing the transaction list.
-- Transaction cards with description, local booking timestamp and currency.
-- Distinguishes negative and nonnegative amounts visually without doing money
-  arithmetic in JavaScript. "Money in" is not necessarily income.
-- Aborts the request when the effect is cleaned up.
-- User-facing interface text is English; bank descriptions retain their original text.
-
-There is one screen in `App.tsx`. No account login, bank connection, on-device CSV
-upload, persistent/offline cache, dashboard, category editing or AI is present.
-Bank/model API credentials belong on the server, never in the app bundle.
-
-## Run on an iPhone
-
-Requires Node 22.13 or later and an Expo Go version compatible with SDK 57.
-Commands below run from the mobile repository root.
-
-1. Start the companion backend with a local CSV. For a shared demo, use synthetic
-   transactions; the backend does not include that demo file yet.
-2. Put the Mac and phone on a mutually reachable trusted network. If university
-   Wi-Fi isolates devices, a personal hotspot may work.
-3. Open `http://YOUR_MAC_LAN_IP:8080/api/transactions` in iPhone Safari. The
-   backend must allow LAN access. `localhost` on the phone means the phone.
-4. In `App.tsx`, replace the current hardcoded development URL with that address.
-   Moving the URL to configuration is task F-02; it is not implemented yet.
-5. Install and start:
+Use Node 22.13+ (22.23.3 was used for verification), JDK/backend and Expo Go
+compatible with SDK 58. No native directories need to be generated.
 
 ```bash
 npm ci
-npx expo login
 npx expo start --lan
 ```
 
-Sign in to Expo Go using the same account and scan the QR code with the iPhone
-camera. Allow Local Network access if prompted. Keep Metro and the Java backend
-running in separate terminals. An Expo tunnel exposes Metro, not the Java API.
+In LAN development, `src/config/api.ts` automatically uses Expo's host address
+with backend port `8080`. Keep the phone and Mac on the same Wi-Fi, run the
+backend on a network-accessible interface, and reconnect to Expo after changing
+networks. No hard-coded Mac IP is needed.
 
-Native installation through Xcode is a later task. Expo Go testing does not mean
-this repository already contains a signed standalone iPhone application.
+To override this address (for example, for a hosted backend):
+
+```bash
+EXPO_PUBLIC_API_URL=https://your-backend.example.com npx expo start --lan
+```
+
+An existing `EXPO_PUBLIC_API_URL` in `.env` takes priority: remove it to use
+automatic detection, then restart Expo. Expo tunnel mode does not expose backend
+port `8080`; use a separate backend URL override for that mode. Release builds
+require an explicit backend URL. Web development without an Expo host falls back
+to `http://localhost:8080`. The URL is public configuration, not a secret.
+Never include bank or model credentials in an `EXPO_PUBLIC_*` variable.
+
+For web preview:
+
+```bash
+npx expo start --web --port 8082
+```
+
+The backend allows localhost web origins on 8081/8082 by default. Restart the
+backend after adding the monthly summary endpoint if hot reload did not pick it
+up. Restart Metro after the initial Expo Router installation/entry-point change.
 
 ## Data contract
 
-```ts
-type Transaction = {
-  description: string;
-  currency: string;
-  state: string;
-  amount: string;
-  fee: string;
-  bookingDate: string;
-};
-```
+- `GET /api/transactions`: persisted transactions and category/review fields.
+- `GET /api/transactions/summary?month=YYYY-MM`: currency-separated monthly totals,
+  category amounts, counts and category spending shares in basis points.
 
-Money remains decimal strings. Displayed timestamps currently replace the ISO
-`T` separator with a space; the value has no timezone and must not be silently
-converted to a UTC instant. Stable transaction IDs are not available yet, so the
-list currently uses temporary index keys. API ownership belongs to the backend;
-coordinate changes across both repositories.
+All monetary arithmetic is performed with `BigDecimal` on the backend. The app
+validates responses and formats decimal strings without floating point money
+conversion. Statement booking months use the source's timezone-free local date,
+not a conversion to UTC.
 
-## Verification and next steps
+Money in means all positive completed payments, including refunds and transfers;
+it is not verified salary. Net flow is not an account balance. Category bars show
+a share of actual outgoing payments, not an invented budget limit. Uncategorized
+spending remains visible. Fees remain separate from the amount totals.
+
+Budget limits, obligation schedules, balance forecasts, account connection,
+category editing in the mobile UI and AI chat are not implemented yet. There are
+no fake balances, fabricated bills or automatic model calls in this UI.
+
+## Structure and checks
+
+Routes are in `src/app/` (Expo Router); reusable native controls in `components`,
+screens in `screens`, shared month/data state in `state`, theme tokens and category
+styles in `theme`. API validation lives beside the HTTP client.
 
 ```bash
 npx tsc --noEmit
+npx expo lint
 ```
 
-TypeScript checking is available. Lint configuration, automated screen tests and
-CI are not configured yet. Manually verify successful loading, stopped-backend
-errors, empty results, long descriptions, large amounts and scrolling on iPhone.
-No screenshot or automated UI-test result is claimed here.
-
-First make the feed robust and reproducible, then add month/currency filters and
-deterministic charts. Connect-account and AI-review screens come after their
-backend contracts exist. See the [checklist](docs/ROADMAP.md).
-
-## Suggested first dashboards
-
-- Monthly money in/out/net per currency, clearly labeled as cash flow.
-- Spending by category, including uncategorized transactions.
-- Merchant totals and a month-to-month trend with an explicit date range.
-
-Totals come from the backend. AI can help explain facts and suggest categories;
-it must not invent transactions or calculate authoritative financial totals.
+Web interaction checks verify navigation, category drill-down, month changes,
+search and empty results. Native iOS/Android appearance still needs device review.
